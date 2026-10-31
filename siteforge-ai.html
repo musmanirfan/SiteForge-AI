@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SiteForge AI: Agents build it. Developers approve it.</title>
+<meta name="description" content="AI agents that handle the repetitive work of building, migrating and revamping websites.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ===== 1. THEME (change colors and fonts here) ===== */
+:root{
+  --ink:#111827; --ink-2:#1F2937; --paper:#FFFFFF; --mist:#F3F4F6;
+  --orange:#F97316; --orange-text:#C2410C; --teal:#14B8A6; --indigo:#6366F1; --amber:#FBBF24; --slate:#64748B;
+  --body-light:#374151; --body-dark:#CBD5E1;
+  --font-head:"Space Grotesk","Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --r:20px; --shadow:0 1px 2px rgba(17,24,39,.06),0 8px 24px rgba(17,24,39,.08),0 24px 48px rgba(17,24,39,.06);
+}
+/* ===== 2. BASE ===== */
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:var(--font-body);color:var(--body-light);background:var(--paper);line-height:1.65;font-size:17px;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{font-family:var(--font-head);color:var(--ink);line-height:1.08;letter-spacing:-.02em}
+h2{font-size:clamp(32px,4.4vw,52px);margin-bottom:16px}
+h3{font-size:21px;line-height:1.25;margin-bottom:8px}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:6px}
+.wrap{width:min(1160px,100% - 40px);margin-inline:auto}
+section{padding:112px 0;position:relative}
+.dark{background:var(--ink);color:var(--body-dark)}
+.dark h2,.dark h3{color:#fff}
+.light{background:var(--mist)}
+.lead{max-width:62ch;font-size:19px}
+.head{margin-bottom:52px}
+.note{font-size:14px;color:var(--slate);margin-top:20px}
+.dark .note{color:#94A3B8}
+.ic{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.grid{display:grid;gap:22px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(270px,1fr))}
+.card{background:var(--paper);border-radius:var(--r);padding:30px;box-shadow:var(--shadow);transition:transform .35s,box-shadow .35s;will-change:transform}
+.dark .card{background:var(--ink-2);box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 20px 40px rgba(0,0,0,.35)}
+.card:hover{transform:translateY(-8px) rotate(-.6deg)}
+.badge{display:inline-grid;place-items:center;width:52px;height:52px;border-radius:16px;margin-bottom:18px;background:rgba(249,115,22,.14);color:var(--orange-text)}
+.dark .badge{color:var(--orange)}
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:10px;font:600 16px var(--font-body);padding:15px 26px;border-radius:999px;border:0;cursor:pointer;text-decoration:none;transition:box-shadow .3s,transform .3s,background .3s}
+.btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;transition:transform .3s}
+.btn:hover svg{transform:translateX(5px)}
+.btn-p{background:var(--orange);color:var(--ink)}
+.btn-p:hover{box-shadow:0 0 0 6px rgba(249,115,22,.22),0 10px 40px rgba(249,115,22,.55)}
+.btn-g{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.35)}
+.btn-g:hover{box-shadow:inset 0 0 0 1.5px var(--orange),0 0 28px rgba(249,115,22,.25)}
+/* reveal */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s;transition-delay:calc(var(--i,0) * 90ms)}
+.rv.in{opacity:1;transform:none}
+.rv.in.card:hover{transform:translateY(-8px) rotate(-.6deg);transition-delay:0s}
+/* progress bar */
+#bar{position:fixed;inset:0 auto auto 0;height:4px;width:100%;background:var(--orange);transform-origin:left;transform:scaleX(0);z-index:100}
+/* ===== 3. NAVBAR ===== */
+nav{position:fixed;inset:0 0 auto;z-index:90;transition:background .3s,backdrop-filter .3s,box-shadow .3s}
+nav.sc{background:rgba(17,24,39,.62);backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%);box-shadow:0 1px 0 rgba(255,255,255,.08)}
+.nv{display:flex;align-items:center;justify-content:space-between;height:72px;gap:20px}
+.logo{font:700 22px var(--font-head);color:#fff;text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo i{width:30px;height:30px;border-radius:9px;background:var(--orange);display:grid;place-items:center}
+.logo i svg{width:18px;height:18px;stroke:var(--ink);fill:none;stroke-width:2.4}
+.links{display:flex;gap:28px;list-style:none;padding:0}
+.links a{color:#E5E7EB;text-decoration:none;font-size:15px;font-weight:500;position:relative;padding:4px 0}
+.links a::after{content:"";position:absolute;left:0;bottom:-2px;width:100%;height:2px;background:var(--orange);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.links a:hover::after{transform:scaleX(1)}
+.nv .btn{padding:11px 20px;font-size:15px}
+@media(max-width:1020px){.links{display:none}}
+@media(max-width:520px){.nv .btn{padding:10px 14px;font-size:14px}}
+/* ===== 4. HERO ===== */
+#hero{padding:150px 0 100px;overflow:hidden;background:var(--ink);color:var(--body-dark);
+  background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:48px 48px}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;pointer-events:none;animation:float 12s ease-in-out infinite}
+.b1{width:420px;height:420px;background:var(--orange);top:-60px;right:8%;opacity:.35}
+.b2{width:340px;height:340px;background:var(--indigo);bottom:-80px;left:-60px;opacity:.3;animation-delay:-4s}
+.b3{width:240px;height:240px;background:var(--teal);top:40%;left:42%;opacity:.16;animation-delay:-8s}
+@keyframes float{50%{transform:translate3d(30px,-40px,0) scale(1.08)}}
+.hero-in{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;position:relative}
+#hero h1{font-size:clamp(42px,6.4vw,72px);color:#fff;margin-bottom:22px}
+#hero .lead{margin-bottom:34px}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap}
+@media(max-width:960px){.hero-in{grid-template-columns:1fr}}
+/* browser mockup */
+.win{background:#0B1220;border-radius:20px;box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.1);overflow:hidden;position:relative}
+.wbar{display:flex;align-items:center;gap:7px;padding:13px 16px;background:#1B2433}
+.wbar i{width:11px;height:11px;border-radius:50%;background:#475569}
+.url{flex:1;margin-left:10px;background:#0B1220;border-radius:8px;height:26px;font-size:12px;color:#94A3B8;display:flex;align-items:center;padding:0 12px}
+.stage{position:relative;height:310px;padding:16px}
+.lay{position:absolute;inset:16px;display:grid;gap:10px}
+.lay div{border-radius:10px}
+/* shopify-style layout: hero banner, 3 product tiles, footer strip */
+.shop{grid-template:62px 96px 1fr 28px/repeat(3,1fr)}
+.shop .s-nav{grid-column:1/-1;background:#334155}
+.shop .s-hero{grid-column:1/-1;background:linear-gradient(120deg,#64748B,#94A3B8)}
+.shop .s-p{background:#475569}
+.shop .s-f{grid-column:1/-1;background:#334155}
+/* elementor-style layout: sections with editable handles */
+.elem{grid-template:62px 1fr 1fr 28px/1.4fr 1fr}
+.elem div{background:rgba(249,115,22,.12);outline:1.5px dashed var(--orange);outline-offset:-1.5px}
+.elem .e-nav{grid-column:1/-1}.elem .e-f{grid-column:1/-1}
+.elem .e-a{background:rgba(99,102,241,.16);outline-color:var(--indigo)}
+.elem .e-b{background:rgba(20,184,166,.16);outline-color:var(--teal)}
+.lay div{animation-duration:9s;animation-iteration-count:infinite;animation-timing-function:ease-in-out;animation-delay:calc(var(--d) * 1s)}
+.shop div{animation-name:outA}.elem div{animation-name:inB}
+@keyframes outA{0%,22%{opacity:1;transform:none}34%,86%{opacity:0;transform:translateY(-14px) scale(.96)}96%,100%{opacity:1;transform:none}}
+@keyframes inB{0%,22%{opacity:0;transform:translateY(14px) scale(.96)}34%,86%{opacity:1;transform:none}96%,100%{opacity:0;transform:translateY(14px) scale(.96)}}
+.scan{position:absolute;left:0;right:0;top:0;height:60px;background:linear-gradient(transparent,rgba(249,115,22,.28));border-bottom:2px solid var(--orange);animation:scan 9s linear infinite;pointer-events:none}
+@keyframes scan{0%{transform:translateY(-60px)}25%,100%{transform:translateY(300px)}}
+.status{display:flex;align-items:center;gap:10px;padding:13px 18px;background:#1B2433;font-size:14px;color:#E5E7EB;position:relative;height:46px}
+.status span{position:absolute;left:44px;opacity:0;animation:stat 9s infinite;animation-delay:calc(var(--k) * 2.25s)}
+.status span:nth-of-type(n){animation-name:stat}
+@keyframes stat{0%{opacity:0;transform:translateY(6px)}4%,22%{opacity:1;transform:none}26%,100%{opacity:0}}
+.status span::after{content:"";display:inline-block;width:2px;height:1em;background:var(--orange);margin-left:3px;vertical-align:-2px;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--teal);position:relative;flex:none}
+.dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--teal);animation:pulse 1.8s ease-out infinite}
+@keyframes pulse{to{transform:scale(3.2);opacity:0}}
+/* ===== 5. MARQUEE ===== */
+.marq{background:var(--ink-2);overflow:hidden;padding:20px 0;border-block:1px solid rgba(255,255,255,.07)}
+.track{display:flex;gap:48px;width:max-content;animation:mq 40s linear infinite;font:600 20px var(--font-head);color:#94A3B8}
+@keyframes mq{to{transform:translateX(-50%)}}
+/* ===== 6. FLOW ===== */
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:0;align-items:stretch;position:relative}
+.step{padding:0 10px;position:relative}
+.step .card{height:100%}
+.arrow{position:absolute;top:50%;right:-26px;width:52px;height:24px;transform:translateY(-50%);z-index:2}
+.arrow path{stroke:var(--orange);stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:70;stroke-dashoffset:70;transition:stroke-dashoffset 1s .6s}
+.flow.in .arrow path{stroke-dashoffset:0}
+.safe{display:flex;gap:12px;align-items:center;margin-top:36px;padding:18px 22px;border-radius:16px;background:rgba(20,184,166,.12);color:#99F6E4;max-width:760px}
+.safe svg{flex:none;color:var(--teal)}
+@media(max-width:900px){.flow{grid-template-columns:1fr;gap:34px}.arrow{top:auto;bottom:-34px;right:50%;transform:translateX(50%) rotate(90deg)}}
+/* ===== 7. TIMELINE ===== */
+.tl{position:relative;max-width:820px;padding-left:64px}
+.tl::before,.tl .fill{content:"";position:absolute;left:23px;top:8px;bottom:8px;width:4px;border-radius:4px;background:#D1D5DB}
+.tl .fill{background:var(--orange);transform-origin:top;transform:scaleY(var(--f,0));will-change:transform}
+.ts{position:relative;margin-bottom:26px}
+.ts .n{position:absolute;left:-64px;top:0;width:50px;height:50px;border-radius:50%;background:var(--paper);display:grid;place-items:center;font:700 19px var(--font-head);color:var(--ink);box-shadow:0 0 0 4px var(--mist),var(--shadow);transition:background .4s,color .4s}
+.ts.on .n{background:var(--orange)}
+.ts .card{padding:20px 24px}
+.ts h3{margin:0 0 4px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.tag{font:600 12px var(--font-body);padding:4px 11px;border-radius:999px;color:#fff}
+.t-h{background:#4338CA}.t-a{background:#0F766E}.t-c{background:#B45309}
+/* ===== 8. PLATFORMS ===== */
+.phase{margin-bottom:34px}
+.phase h3{font-size:18px;margin-bottom:14px;color:#fff}
+.chips{display:flex;flex-wrap:wrap;gap:12px}
+.chip{padding:12px 22px;border-radius:999px;background:var(--ink-2);color:#E5E7EB;font-weight:600;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);opacity:0;transform:scale(.6);transition:opacity .5s,transform .5s cubic-bezier(.3,1.5,.5,1),background .25s,color .25s;transition-delay:calc(var(--i) * 110ms)}
+.in .chip{opacity:1;transform:none}
+.in .chip:hover{transform:scale(1.1);background:var(--orange);color:var(--ink);transition-delay:0s}
+.p1 .chip{box-shadow:inset 0 0 0 1.5px var(--orange)}
+/* ===== 9. AGENTS ===== */
+.ag{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:26px}
+.ag .card{padding:40px;position:relative;overflow:hidden}
+.ag .card::before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-90px;top:-90px;background:var(--c);opacity:.14;transition:transform .6s,opacity .6s}
+.ag .card:hover::before{transform:scale(1.8);opacity:.2}
+.ag ul{padding-left:20px;margin-top:16px}
+.ag li{margin-bottom:6px}
+.eg{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.eg span{font-size:14px;font-weight:600;padding:6px 12px;border-radius:10px;background:var(--mist);color:var(--ink)}
+/* ===== 10. DEMO SLIDER ===== */
+.cmp{position:relative;max-width:860px;margin:0 auto;aspect-ratio:16/10;border-radius:24px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5);--pos:50%;user-select:none;touch-action:pan-y}
+.pane{position:absolute;inset:0;padding:26px;display:grid;gap:12px;grid-template-rows:.45fr 1.2fr 1fr .3fr}
+.pane>div{border-radius:12px}
+.pane .row{display:grid;gap:12px;grid-template-columns:repeat(3,1fr)}
+.src{background:#CBD5E1}
+.src .a{background:#94A3B8}.src .b{background:linear-gradient(120deg,#64748B,#94A3B8)}.src .c{background:#E2E8F0}
+.dst{background:#1E1B3A;clip-path:inset(0 0 0 var(--pos))}
+.dst .a{background:rgba(249,115,22,.25);outline:2px dashed var(--orange);outline-offset:-2px}
+.dst .b{background:linear-gradient(120deg,var(--indigo),var(--teal));outline:2px dashed #fff;outline-offset:-2px}
+.dst .c{background:rgba(251,191,36,.2);outline:2px dashed var(--amber);outline-offset:-2px}
+.lbl{position:absolute;top:14px;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;background:rgba(17,24,39,.85);color:#fff;z-index:3}
+.lbl.l{left:14px}.lbl.r{right:14px}
+.hd{position:absolute;top:0;bottom:0;left:var(--pos);width:4px;margin-left:-2px;background:#fff;z-index:4;pointer-events:none}
+.hd::after{content:"";position:absolute;top:50%;left:50%;width:46px;height:46px;margin:-23px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px #fff,0 8px 24px rgba(0,0,0,.4)}
+.cmp input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;z-index:5;margin:0}
+.cmp:has(input:focus-visible){outline:3px solid var(--amber);outline-offset:4px}
+/* ===== 11. IMPACT ===== */
+.imp{display:flex;flex-wrap:wrap;gap:30px;align-items:center;justify-content:center;text-align:center}
+.big{font:700 clamp(60px,11vw,140px)/1 var(--font-head);color:var(--ink);letter-spacing:-.04em}
+.big.o{color:var(--orange-text)}
+.imp .mid{font-size:clamp(30px,5vw,56px);color:var(--slate)}
+.per{width:100%;font-size:19px;color:var(--ink);font-weight:600}
+.hyp{display:inline-block;margin-top:14px;padding:8px 18px;border-radius:999px;background:var(--amber);color:var(--ink);font-weight:600;font-size:15px}
+/* ===== 12. ROADMAP ===== */
+.soon{display:inline-block;font:600 12px var(--font-body);padding:4px 12px;border-radius:999px;background:rgba(251,191,36,.16);color:var(--amber);margin-bottom:14px}
+/* ===== 13. PRICING ===== */
+.price{display:flex;flex-direction:column}
+.price .amt{font:700 38px var(--font-head);color:var(--ink);margin:10px 0 4px}
+.price .amt small{font:500 16px var(--font-body);color:var(--slate)}
+.price.hot{background:var(--ink);color:var(--body-dark);transform:translateY(-14px);box-shadow:0 0 0 3px var(--orange),0 30px 70px rgba(249,115,22,.3)}
+.price.hot h3,.price.hot .amt{color:#fff}
+.price.hot:hover,.price.hot.in:hover{transform:translateY(-22px) rotate(-.6deg)}
+.pop{align-self:flex-start;background:var(--orange);color:var(--ink);font:700 12px var(--font-body);padding:4px 12px;border-radius:999px;margin-bottom:10px}
+@media(max-width:700px){.price.hot{transform:none}}
+/* ===== 14. TRUST + CTA + FOOTER ===== */
+.trust{display:grid;gap:22px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.trust .card{display:flex;gap:18px;align-items:flex-start}
+.trust .badge{margin:0;flex:none}
+#cta{text-align:center;overflow:hidden;background:var(--ink)}
+#cta h2{font-size:clamp(38px,6vw,76px);color:#fff;max-width:14ch;margin:0 auto 18px}
+.fm{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:34px auto 0;max-width:560px}
+.fm input{flex:1 1 260px;padding:16px 22px;border-radius:999px;border:1.5px solid rgba(255,255,255,.25);background:rgba(255,255,255,.07);color:#fff;font:16px var(--font-body)}
+.fm input::placeholder{color:#94A3B8}
+.ok{display:none;margin-top:24px;color:#5EEAD4;font-weight:600;font-size:18px}
+.ok.show{display:block;animation:pop .5s}
+@keyframes pop{from{opacity:0;transform:scale(.9)}}
+footer{background:#0B1220;color:#94A3B8;padding:44px 0;font-size:15px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;align-items:center}
+/* ===== REDUCED MOTION ===== */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .rv,.chip{opacity:1;transform:none}
+  .shop{opacity:1}.elem{opacity:0}.scan{display:none}
+  .status span:first-of-type{opacity:1}
+  .arrow path{stroke-dashoffset:0}
+}
+</style>
+</head>
+<body>
+<!-- Shared SVG icons -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-press" viewBox="0 0 24 24"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17v.01"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></symbol>
+  <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 14v.01M15 14v.01"/></symbol>
+  <symbol id="i-stage" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 11l2 2 4-4"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-arr" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+</svg>
+
+<div id="bar" aria-hidden="true"></div>
+
+<!-- ===== NAVBAR ===== -->
+<nav id="nav" aria-label="Main">
+  <div class="wrap nv">
+    <a class="logo" href="#hero" aria-label="SiteForge AI home"><i><svg viewBox="0 0 24 24"><path d="M4 18l6-12 4 8 2-4 4 8"/></svg></i>SiteForge AI</a>
+    <ul class="links">
+      <li><a href="#problem">Problem</a></li><li><a href="#how">How it works</a></li><li><a href="#platforms">Platforms</a></li>
+      <li><a href="#agents">Agents</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#roadmap">Roadmap</a></li>
+    </ul>
+    <a class="btn btn-p" href="#join">Join the waitlist</a>
+  </div>
+</nav>
+
+<main>
+<!-- ===== HERO ===== -->
+<header id="hero">
+  <div class="blob b1" data-p="30"></div><div class="blob b2" data-p="-20"></div><div class="blob b3" data-p="15"></div>
+  <div class="wrap hero-in">
+    <div>
+      <h1>Agents build it. Developers approve it.</h1>
+      <p class="lead">AI agents that handle the repetitive work of building, migrating and revamping websites.</p>
+      <div class="cta-row">
+        <a class="btn btn-p magnet" href="#join">Join the waitlist <svg viewBox="0 0 24 24"><use href="#i-arr"/></svg></a>
+        <a class="btn btn-g" href="#how">See how it works</a>
+      </div>
+    </div>
+    <div class="win" role="img" aria-label="Animated mockup: a Shopify-style layout is rebuilt block by block into an editable Elementor-style layout">
+      <div class="wbar"><i></i><i></i><i></i><span class="url">staging.client-site.com</span></div>
+      <div class="stage">
+        <div class="lay shop"><div class="s-nav" style="--d:.0"></div><div class="s-hero" style="--d:.15"></div><div class="s-p" style="--d:.3"></div><div class="s-p" style="--d:.45"></div><div class="s-p" style="--d:.6"></div><div class="s-f" style="--d:.75"></div></div>
+        <div class="lay elem"><div class="e-nav" style="--d:.0"></div><div class="e-a" style="--d:.15"></div><div class="e-b" style="--d:.3"></div><div style="--d:.45"></div><div class="e-b" style="--d:.6"></div><div class="e-f" style="--d:.75"></div></div>
+        <div class="scan"></div>
+      </div>
+      <div class="status" aria-live="off"><i class="dot"></i>
+        <span style="--k:0">Reading design...</span><span style="--k:1">Planning sections...</span><span style="--k:2">Building on staging...</span><span style="--k:3">Ready for review</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="marq" aria-hidden="true"><div class="track" id="mq"></div></div>
+
+<!-- ===== PROBLEM ===== -->
+<section id="problem" class="light">
+  <div class="wrap">
+    <div class="head rv"><h2>Rebuilding the same layout, again.</h2><p class="lead">Agencies lose their best hours to work that follows the same pattern on every project.</p></div>
+    <div class="grid g4">
+      <article class="card rv" style="--i:0"><div class="badge"><svg class="ic"><use href="#i-copy"/></svg></div><h3>Manual rebuilds</h3><p>Moving a design from one platform to another means recreating every layout by hand.</p></article>
+      <article class="card rv" style="--i:1"><div class="badge"><svg class="ic"><use href="#i-repeat"/></svg></div><h3>Repeated revamp steps</h3><p>Review old site, study references, plan, rebuild, test, every time.</p></article>
+      <article class="card rv" style="--i:2"><div class="badge"><svg class="ic"><use href="#i-clock"/></svg></div><h3>Developer time wasted</h3><p>Hours go to layout copying instead of custom features.</p></article>
+      <article class="card rv" style="--i:3"><div class="badge"><svg class="ic"><use href="#i-press"/></svg></div><h3>Client pressure</h3><p>Fast delivery and low price, but the result must match the reference.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SOLUTION FLOW ===== -->
+<section id="solution" class="dark">
+  <div class="wrap">
+    <div class="head rv"><h2>From a link to a staging site.</h2><p class="lead">The agent does the heavy lifting. You stay in control of what ships.</p></div>
+    <div class="flow rv" id="flow">
+      <div class="step"><article class="card"><div class="badge"><svg class="ic"><use href="#i-link"/></svg></div><h3>Input</h3><p>Source site link or CMS access, plus an optional reference.</p></article>
+        <svg class="arrow" viewBox="0 0 52 24" aria-hidden="true"><path d="M2 12h46M38 4l10 8-10 8"/></svg></div>
+      <div class="step"><article class="card"><div class="badge"><svg class="ic"><use href="#i-bot"/></svg></div><h3>AI Agent</h3><p>Reads the design, plans sections and builds.</p></article>
+        <svg class="arrow" viewBox="0 0 52 24" aria-hidden="true"><path d="M2 12h46M38 4l10 8-10 8"/></svg></div>
+      <div class="step"><article class="card"><div class="badge"><svg class="ic"><use href="#i-stage"/></svg></div><h3>Staging site</h3><p>The build lands on staging, never live.</p></article>
+        <svg class="arrow" viewBox="0 0 52 24" aria-hidden="true"><path d="M2 12h46M38 4l10 8-10 8"/></svg></div>
+      <div class="step"><article class="card"><div class="badge"><svg class="ic"><use href="#i-user"/></svg></div><h3>Developer</h3><p>Reviews and approves.</p></article></div>
+    </div>
+    <p class="safe rv"><svg class="ic"><use href="#i-shield"/></svg><span>Source access is read-only. The agent writes only to staging. Nothing goes live without human approval.</span></p>
+  </div>
+</section>
+
+<!-- ===== HOW ONE PROJECT RUNS ===== -->
+<section id="how" class="light">
+  <div class="wrap">
+    <div class="head rv"><h2>How one project runs</h2><p class="lead">Seven steps. Code and AI take the repetitive ones, people make the decisions.</p></div>
+    <div class="tl" id="tl"><span class="fill" aria-hidden="true"></span>
+      <div class="ts rv"><span class="n">1</span><article class="card"><h3>Connect <span class="tag t-h">Developer</span></h3><p>Share the source site and an optional reference.</p></article></div>
+      <div class="ts rv"><span class="n">2</span><article class="card"><h3>Analyse <span class="tag t-a">AI + code</span></h3><p>The agent reads layouts, styles and content.</p></article></div>
+      <div class="ts rv"><span class="n">3</span><article class="card"><h3>Plan <span class="tag t-a">AI</span></h3><p>It plans the sections and the page structure.</p></article></div>
+      <div class="ts rv"><span class="n">4</span><article class="card"><h3>Build <span class="tag t-a">Code</span></h3><p>Pages are built as editable content on staging.</p></article></div>
+      <div class="ts rv"><span class="n">5</span><article class="card"><h3>Check <span class="tag t-a">Code + AI</span></h3><p>Screenshot compare on desktop and mobile.</p></article></div>
+      <div class="ts rv"><span class="n">6</span><article class="card"><h3>Review <span class="tag t-h">Human</span></h3><p>A developer inspects the staging site.</p></article></div>
+      <div class="ts rv"><span class="n">7</span><article class="card"><h3>Approve <span class="tag t-h">Human</span></h3><p>Only an approval moves the work forward.</p></article></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PLATFORMS ===== -->
+<section id="platforms" class="dark">
+  <div class="wrap" id="plat">
+    <div class="head rv"><h2>Supported platforms</h2></div>
+    <div class="phase p1"><h3>Phase 1: MVP</h3><div class="chips"><span class="chip" style="--i:0">Shopify</span><span class="chip" style="--i:1">WordPress + Elementor</span><span class="chip" style="--i:2">WooCommerce</span></div></div>
+    <div class="phase"><h3>Phase 2</h3><div class="chips"><span class="chip" style="--i:3">Wix</span><span class="chip" style="--i:4">Squarespace</span><span class="chip" style="--i:5">Webflow</span></div></div>
+    <div class="phase"><h3>Phase 3</h3><div class="chips"><span class="chip" style="--i:6">Magento</span><span class="chip" style="--i:7">Joomla</span><span class="chip" style="--i:8">Drupal</span><span class="chip" style="--i:9">Custom HTML / React</span></div></div>
+    <p class="note">Each platform gets its own connector, so support grows one platform at a time.</p>
+  </div>
+</section>
+
+<!-- ===== CORE AGENTS ===== -->
+<section id="agents">
+  <div class="wrap">
+    <div class="head rv"><h2>Two agents to start</h2></div>
+    <div class="ag">
+      <article class="card rv" style="--c:var(--orange)"><div class="badge"><svg class="ic"><use href="#i-repeat"/></svg></div><h3>Design Migration Agent</h3><p>Copies a site’s design from one CMS into another as editable pages.</p>
+        <div class="eg"><span>Shopify → Elementor</span><span>Wix → WordPress</span><span>WordPress → Webflow</span></div></article>
+      <article class="card rv" style="--c:var(--indigo);--i:1"><div class="badge"><svg class="ic"><use href="#i-eye"/></svg></div><h3>Website Revamp Agent</h3><p>Takes a site link and a reference link, then rebuilds the site in the reference style while keeping the client’s content.</p>
+        <ul><li>Comparison with reference</li><li>Revamp plan</li><li>Staging build</li></ul></article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BEFORE / AFTER ===== -->
+<section id="demo" class="dark">
+  <div class="wrap">
+    <div class="head rv"><h2>Drag to compare</h2><p class="lead">Source design on the left, the rebuilt version on staging on the right.</p></div>
+    <div class="cmp rv" id="cmp">
+      <div class="pane src" aria-hidden="true"><div class="a"></div><div class="b"></div><div class="row"><div class="c"></div><div class="c"></div><div class="c"></div></div><div class="a"></div></div>
+      <div class="pane dst" aria-hidden="true"><div class="a"></div><div class="b"></div><div class="row"><div class="c"></div><div class="c"></div><div class="c"></div></div><div class="a"></div></div>
+      <span class="lbl l">Source design</span><span class="lbl r">Rebuilt on staging</span>
+      <div class="hd"></div>
+      <input type="range" min="0" max="100" value="50" aria-label="Compare source design and rebuilt staging site">
+    </div>
+  </div>
+</section>
+
+<!-- ===== IMPACT ===== -->
+<section id="impact" class="light">
+  <div class="wrap rv">
+    <div class="head" style="text-align:center"><h2>Impact target</h2></div>
+    <div class="imp"><span class="big"><span class="cnt" data-to="14">0</span>h</span><span class="mid" aria-label="to">→</span><span class="big o"><span class="cnt" data-to="5.5" data-dec="1">0</span>h</span><span class="per">per page</span></div>
+    <p style="text-align:center"><span class="hyp">Hypothetical target, to be measured in the pilot.</span></p>
+  </div>
+</section>
+
+<!-- ===== VISION ===== -->
+<section id="vision" class="dark">
+  <div class="wrap rv"><h2 style="max-width:20ch">Our vision</h2>
+    <p class="lead" style="font-size:clamp(22px,3vw,32px);color:#fff;font-family:var(--font-head);line-height:1.35;max-width:34ch">“Start narrow with design migration and site revamps, then grow into a full AI platform for every agency service: SEO, social media, content, maintenance and reporting.”</p></div>
+</section>
+
+<!-- ===== ROADMAP ===== -->
+<section id="roadmap" class="light">
+  <div class="wrap">
+    <div class="head rv"><h2>What comes next</h2></div>
+    <div class="grid g3" style="--x:0">
+      <article class="card rv" style="--i:0;background:var(--ink-2);color:var(--body-dark)"><span class="soon">Coming soon</span><h3 style="color:#fff">SEO Agent</h3></article>
+      <article class="card rv" style="--i:1;background:var(--ink-2);color:var(--body-dark)"><span class="soon">Coming soon</span><h3 style="color:#fff">Social Media Agent</h3></article>
+      <article class="card rv" style="--i:2;background:var(--ink-2);color:var(--body-dark)"><span class="soon">Coming soon</span><h3 style="color:#fff">Content Agent</h3></article>
+      <article class="card rv" style="--i:3;background:var(--ink-2);color:var(--body-dark)"><span class="soon">Coming soon</span><h3 style="color:#fff">Maintenance Agent</h3></article>
+      <article class="card rv" style="--i:4;background:var(--ink-2);color:var(--body-dark)"><span class="soon">Coming soon</span><h3 style="color:#fff">Reporting Agent</h3></article>
+      <article class="card rv" style="--i:5;background:var(--ink-2);color:var(--body-dark)"><span class="soon">Coming soon</span><h3 style="color:#fff">QA Agent</h3></article>
+    </div>
+    <p class="note rv" style="font-size:17px">All agents share one login, one project view and one approval workflow.</p>
+  </div>
+</section>
+
+<!-- ===== PRICING ===== -->
+<section id="pricing">
+  <div class="wrap">
+    <div class="head rv"><h2>Pricing</h2></div>
+    <div class="grid g4" style="align-items:stretch">
+      <article class="card price rv" style="--i:0"><h3>Free trial</h3><div class="amt">PKR 0</div></article>
+      <article class="card price rv" style="--i:1"><h3>Freelancer</h3><div class="amt">PKR 5,000<small>/mo</small></div></article>
+      <article class="card price hot rv" style="--i:2"><span class="pop">Most popular</span><h3>Agency</h3><div class="amt">PKR 20,000<small>/mo</small></div></article>
+      <article class="card price rv" style="--i:3"><h3>Agency Plus</h3><div class="amt">PKR 45,000<small>/mo</small></div></article>
+    </div>
+    <p class="note">Prices are early hypotheses and may change.</p>
+  </div>
+</section>
+
+<!-- ===== TRUST ===== -->
+<section id="trust" class="dark">
+  <div class="wrap">
+    <div class="head rv"><h2>Built to be safe by default</h2></div>
+    <div class="trust">
+      <article class="card rv" style="--i:0"><div class="badge"><svg class="ic"><use href="#i-eye"/></svg></div><div><h3>Read-only source access</h3></div></article>
+      <article class="card rv" style="--i:1"><div class="badge"><svg class="ic"><use href="#i-lock"/></svg></div><div><h3>Staging-only writes</h3></div></article>
+      <article class="card rv" style="--i:2"><div class="badge"><svg class="ic"><use href="#i-user"/></svg></div><div><h3>Human approval before go-live</h3></div></article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FINAL CTA ===== -->
+<section id="join">
+  <div class="blob b1" style="opacity:.25"></div><div class="blob b2" style="opacity:.25"></div>
+  <div class="wrap" style="position:relative">
+    <h2 class="rv" style="color:#fff">Stop rebuilding layouts by hand.</h2>
+    <form class="fm rv" id="wl" novalidate>
+      <label for="em" style="position:absolute;left:-9999px">Email address</label>
+      <input id="em" type="email" placeholder="you@agency.com" autocomplete="email" required>
+      <button class="btn btn-p magnet" type="submit">Join the waitlist <svg viewBox="0 0 24 24"><use href="#i-arr"/></svg></button>
+    </form>
+    <p class="ok" id="ok" role="status">Thanks! You’re on the waitlist. We’ll be in touch.</p>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap"><a class="logo" href="#hero" style="font-size:18px">SiteForge AI</a><span>Agents build it. Developers approve it.</span><span>© 2026 SiteForge AI</span></div></footer>
+
+<script>
+/* ===== JS: interactions ===== */
+(function(){
+  var rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $=function(s,c){return (c||document).querySelector(s)}, $$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))};
+
+  // Marquee names (duplicated for seamless loop)
+  var names=['Shopify','WordPress','Elementor','WooCommerce','Wix','Squarespace','Webflow','Magento','Joomla','Drupal','Custom HTML / React'];
+  $('#mq').innerHTML=names.concat(names).map(function(n){return '<span>'+n+'</span>'}).join('');
+
+  // Reveal on scroll (IntersectionObserver)
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.15});
+  $$('.rv,#flow,#plat').forEach(function(el){io.observe(el)});
+
+  // Animated counters
+  function count(el){var to=+el.dataset.to,dec=+el.dataset.dec||0,t0=performance.now(),d=1600;
+    (function f(t){var p=Math.min((t-t0)/d,1);el.textContent=(to*(1-Math.pow(1-p,3))).toFixed(dec);if(p<1)requestAnimationFrame(f)})(t0)}
+  var co=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){rm?e.target.textContent=e.target.dataset.to:count(e.target);co.unobserve(e.target)}})},{threshold:.6});
+  $$('.cnt').forEach(function(c){co.observe(c)});
+
+  // Scroll: nav blur, progress bar, timeline fill, hero parallax
+  var nav=$('#nav'),bar=$('#bar'),tl=$('#tl'),steps=$$('.ts'),blobs=$$('.blob[data-p]'),tick=false;
+  function onScroll(){
+    var y=scrollY,h=document.documentElement.scrollHeight-innerHeight;
+    nav.classList.toggle('sc',y>20);
+    bar.style.transform='scaleX('+(h>0?y/h:0)+')';
+    var r=tl.getBoundingClientRect(),f=Math.min(1,Math.max(0,(innerHeight*.6-r.top)/r.height));
+    tl.style.setProperty('--f',f);
+    steps.forEach(function(s){s.classList.toggle('on',s.getBoundingClientRect().top<innerHeight*.6)});
+    if(!rm&&y<900)blobs.forEach(function(b){b.style.translate='0 '+(y*b.dataset.p/100)+'px'});
+    tick=false;
+  }
+  addEventListener('scroll',function(){if(!tick){tick=true;requestAnimationFrame(onScroll)}},{passive:true});
+  onScroll();
+
+  // Before/after slider
+  var cmp=$('#cmp'),rg=$('input',cmp);
+  rg.addEventListener('input',function(){cmp.style.setProperty('--pos',rg.value+'%')});
+
+  // Magnetic CTA buttons
+  if(!rm)$$('.magnet').forEach(function(b){
+    b.addEventListener('mousemove',function(e){var r=b.getBoundingClientRect();b.style.transform='translate('+((e.clientX-r.left-r.width/2)*.25)+'px,'+((e.clientY-r.top-r.height/2)*.35)+'px)'});
+    b.addEventListener('mouseleave',function(){b.style.transform=''});
+  });
+
+  // Waitlist form (front-end only)
+  $('#wl').addEventListener('submit',function(e){e.preventDefault();var i=$('#em');
+    if(!/^\S+@\S+\.\S+$/.test(i.value)){i.focus();i.setCustomValidity('Enter a valid email');i.reportValidity();i.setCustomValidity('');return}
+    this.style.display='none';$('#ok').classList.add('show')});
+})();
+</script>
+</body>
+</html>
